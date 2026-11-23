@@ -1,4 +1,4 @@
-# Week 4 – Day 1: Unread Email Summariser
+# AI agent-Unread Email Summariser
 
 ## Project Overview
 Built an AI-powered Gmail automation workflow using n8n that automatically fetches the latest 5 unread emails, generates individual AI summaries, combines them, and sends the consolidated summary to Gmail.
