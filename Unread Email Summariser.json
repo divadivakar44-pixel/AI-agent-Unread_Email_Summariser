@@ -1,0 +1,201 @@
+{
+  "name": "Unread Email Summariser",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "7454d3ad-8a68-44b5-8636-0a9235c6bfd0",
+      "name": "Run Manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 5,
+        "filters": {
+          "readStatus": "unread"
+        }
+      },
+      "id": "9844ba58-0a1a-4ed3-94df-d247c7d9660f",
+      "name": "Get Unread Emails",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        304
+      ],
+      "webhookId": "77c332d9-89b5-49fe-a028-63ae9b761d38",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "akOql7lZ2aPtykCx",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write ONE line (20 words maximum) describing this email.\nNo greeting, no heading, no extra text.\nFrom: {{ $json.From }}    Subject: {{ $json.Subject }}\nPreview: {{ $json.snippet }}",
+        "options": {
+          "systemMessage": "You summarise emails. Reply with exactly one line of at most 20 words. No greeting, no heading, no extra text."
+        }
+      },
+      "id": "8fd3bdbf-7606-4091-987b-9bd353e37bc7",
+      "name": "Summarise Email",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        784,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "9b63aa4f-f225-4ba4-b5f1-cf282765c98e",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        544
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "rnrqlGSjr2wf7EyL",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "output"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4966c10a-336e-4b3a-91a3-233aed914cd3",
+      "name": "Combine Summaries",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "divadivakar44@gmail.com",
+        "subject": "Your 5 unread emails",
+        "emailType": "text",
+        "message": "={{ $json.output.join(\"\\n\\n\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "eb13d8c7-23d3-454c-9ee8-2cd28e89cdb7",
+      "name": "Send Summary Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1376,
+        304
+      ],
+      "webhookId": "a0d5eb52-27d5-47b0-957a-05ce71538bdf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "akOql7lZ2aPtykCx",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Run Manually": {
+      "main": [
+        [
+          {
+            "node": "Get Unread Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Unread Emails": {
+      "main": [
+        [
+          {
+            "node": "Summarise Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarise Email": {
+      "main": [
+        [
+          {
+            "node": "Combine Summaries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarise Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Summaries": {
+      "main": [
+        [
+          {
+            "node": "Send Summary Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "c2bb6633-64ea-4e0c-ae72-e72b617e5306",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "ca18382fd78710570b957a22959fd7e8d7be3ab6e5946d38b74628bbc232cb70"
+  },
+  "nodeGroups": [],
+  "id": "VfkTl4436xCkOGza",
+  "tags": []
+}
